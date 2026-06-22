@@ -1,0 +1,22 @@
+{
+  "name": "universal-save-editor",
+  "version": "1.0.0",
+  "description": "Universal save game editor for Yakuza Rogue (.es3) and RPG Maker (.rpgsave) games",
+  "main": "index.html",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "cli": "node cli/yakuza_rogue_editor.js",
+    "cli:auto": "node cli/yakuza_rogue_editor.js --auto"
+  },
+  "keywords": [
+    "yakuza-rogue",
+    "save-editor",
+    "cheat",
+    "dojo-ntr",
+    "yokohama-massage"
+  ],
+  "author": "Antigravity AI",
+  "license": "MIT",
+  "dependencies": {}
+}

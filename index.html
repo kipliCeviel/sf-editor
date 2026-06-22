@@ -1,0 +1,1967 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SF Editor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #05060b;
+            --bg-card: rgba(12, 14, 23, 0.52);
+            --accent-pink: #ff3a3a; /* Koban Red Neon */
+            --accent-purple: #ffd31d; /* Koban Yellow Neon */
+            --accent-blue: #1e3c72; /* Dark Sky Blue */
+            --text-main: #f8f9fa;
+            --text-muted: #a4b0be;
+            --glow: 0 0 15px rgba(255, 58, 58, 0.35);
+            --border: 1px solid rgba(255, 58, 58, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-dark);
+            background-image: 
+                linear-gradient(rgba(8, 10, 18, 0.35), rgba(8, 10, 18, 0.6)),
+                url('bg.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            overflow-x: hidden;
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            backdrop-filter: blur(20px);
+            background: var(--bg-card);
+            border: var(--border);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(255, 58, 58, 0.15);
+            position: relative;
+            z-index: 1;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--accent-pink), var(--accent-purple), transparent, var(--accent-pink));
+            border-radius: 26px;
+            z-index: -1;
+            opacity: 0.15;
+            pointer-events: none;
+        }
+
+        h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 800;
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, var(--accent-pink), #ff7e40, var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(255, 58, 58, 0.15);
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin-bottom: 40px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Drag & Drop Area */
+        .drop-zone {
+            border: 2px dashed rgba(255, 118, 67, 0.3);
+            border-radius: 16px;
+            padding: 50px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 118, 67, 0.02);
+            margin-bottom: 25px;
+        }
+
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: var(--accent-pink);
+            background: rgba(255, 118, 67, 0.05);
+            box-shadow: var(--glow);
+            transform: scale(1.01);
+        }
+
+        .drop-icon {
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+            display: inline-block;
+            filter: drop-shadow(0 0 10px rgba(255, 118, 67, 0.3));
+            animation: bounce 2s infinite ease-in-out;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .drop-text {
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+        }
+
+        .drop-subtext {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Password input section */
+        .pw-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        label {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="text"], input[type="number"], select, textarea {
+            background: rgba(10, 5, 25, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 14px 16px;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 1rem;
+            width: 100%;
+            transition: all 0.2s ease;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent-pink);
+            box-shadow: var(--glow);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--accent-pink) 0%, var(--accent-purple) 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 14px 28px;
+            color: white;
+            font-weight: 700;
+            font-family: 'Space Grotesk', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 118, 67, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 118, 67, 0.5), var(--glow);
+            filter: brightness(1.1);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            box-shadow: none;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: none;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Game type badge */
+        .game-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+        }
+
+        .badge-massage {
+            background: rgba(255, 118, 67, 0.15);
+            color: var(--accent-pink);
+            border-color: rgba(255, 118, 67, 0.3);
+        }
+
+        .badge-dojo {
+            background: rgba(142, 45, 226, 0.15);
+            color: #b179ff;
+            border-color: rgba(142, 45, 226, 0.3);
+        }
+
+        .badge-countryside {
+            background: rgba(46, 204, 113, 0.15);
+            color: #2ecc71;
+            border-color: rgba(46, 204, 113, 0.3);
+        }
+
+        .badge-sister {
+            background: rgba(52, 152, 219, 0.15);
+            color: #3498db;
+            border-color: rgba(52, 152, 219, 0.3);
+        }
+
+        .badge-unknown {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+        }
+
+        /* Editing Section tabs */
+        .editor-section {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 30px;
+            gap: 15px;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-family: 'Space Grotesk', sans-serif;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .tab:hover {
+            color: var(--text-main);
+        }
+
+        .tab.active {
+            color: var(--accent-pink);
+            border-bottom-color: var(--accent-pink);
+            text-shadow: 0 0 10px rgba(255, 118, 67, 0.2);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .grid-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 600px) {
+            .grid-inputs {
+                grid-template-columns: 1fr;
+            }
+            .container {
+                padding: 25px;
+            }
+        }
+
+        .input-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .input-item span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Raw editor area */
+        textarea.raw-editor {
+            height: 350px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            resize: vertical;
+        }
+
+        .button-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 25px;
+        }
+
+        /* Toast notifications */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(15, 10, 30, 0.9);
+            border: var(--border);
+            border-radius: 12px;
+            padding: 16px 24px;
+            color: var(--text-main);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), var(--glow);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            backdrop-filter: blur(8px);
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.error {
+            border-color: #ff3333;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 51, 51, 0.3);
+        }
+
+        .hidden-file-input {
+            display: none;
+        }
+
+        /* Loading spinner */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .game-select-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 20px;
+        }
+        .game-select-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .game-select-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+        }
+        .game-select-btn {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            padding: 15px;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-align: left;
+        }
+        .game-select-btn:hover {
+            border-color: rgba(255, 118, 67, 0.4);
+            background: rgba(255, 118, 67, 0.03);
+            transform: translateY(-2px);
+        }
+        .game-select-btn.active {
+            border-color: var(--accent-pink);
+            background: rgba(255, 118, 67, 0.08);
+            box-shadow: var(--glow);
+        }
+        .game-select-icon {
+            font-size: 1.8rem;
+        }
+        .game-select-name {
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        /* Author Section */
+        .author-section {
+            margin-top: 35px;
+            padding-top: 25px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .author-avatar {
+            font-size: 1.8rem;
+            background: rgba(255, 118, 67, 0.1);
+            border: 1px solid rgba(255, 118, 67, 0.25);
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 10px rgba(255, 118, 67, 0.1);
+        }
+
+        .author-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+        }
+
+        .author-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--accent-pink);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .author-name {
+            font-size: 0.95rem;
+            color: var(--text-main);
+        }
+
+        .author-link {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            border-radius: 12px;
+            padding: 10px 18px;
+            color: var(--text-main);
+            font-weight: 600;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.9rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .author-link:hover {
+            background: var(--accent-pink);
+            border-color: var(--accent-pink);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: var(--glow);
+        }
+
+        .github-icon {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Avatar image */
+        .author-avatar-img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--accent-pink);
+            box-shadow: 0 0 10px rgba(255, 58, 58, 0.25);
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle-btn {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-main);
+            z-index: 10;
+        }
+
+        .theme-toggle-btn:hover {
+            background: rgba(255, 58, 58, 0.1);
+            border-color: var(--accent-pink);
+            transform: scale(1.08);
+            box-shadow: var(--glow);
+        }
+
+        /* Request Game Banner Button */
+        .request-banner-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background: rgba(255, 58, 58, 0.06);
+            border: 1px dashed rgba(255, 58, 58, 0.3);
+            border-radius: 14px;
+            padding: 14px 20px;
+            color: var(--text-main);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.92rem;
+            transition: all 0.3s ease;
+            margin-top: 30px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .request-banner-btn:hover {
+            background: rgba(255, 58, 58, 0.12);
+            border-color: var(--accent-pink);
+            transform: translateY(-2px);
+            box-shadow: var(--glow);
+        }
+
+        .request-icon {
+            font-size: 1.2rem;
+        }
+
+        /* Day Mode Variables & Styles */
+        body.day-mode {
+            --bg-dark: #f1f3f6;
+            --bg-card: rgba(255, 255, 255, 0.65);
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            background-image: 
+                linear-gradient(rgba(240, 242, 245, 0.4), rgba(240, 242, 245, 0.65)),
+                url('bg.jpg');
+        }
+
+        body.day-mode .container {
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1), 0 0 30px rgba(255, 58, 58, 0.08);
+        }
+
+        body.day-mode input[type="text"],
+        body.day-mode input[type="number"],
+        body.day-mode select,
+        body.day-mode textarea {
+            background: rgba(255, 255, 255, 0.95);
+            color: #1e293b;
+            border-color: rgba(0, 0, 0, 0.15);
+        }
+
+        body.day-mode input[type="text"]:focus,
+        body.day-mode input[type="number"]:focus,
+        body.day-mode select:focus,
+        body.day-mode textarea:focus {
+            border-color: var(--accent-pink);
+            box-shadow: 0 0 10px rgba(255, 58, 58, 0.15);
+        }
+
+        body.day-mode .btn-secondary {
+            background: rgba(0, 0, 0, 0.04);
+            border-color: rgba(0, 0, 0, 0.1);
+            color: #1e293b;
+        }
+
+        body.day-mode .btn-secondary:hover {
+            background: rgba(0, 0, 0, 0.08);
+        }
+
+        body.day-mode .author-link {
+            background: rgba(0, 0, 0, 0.04);
+            border-color: rgba(0, 0, 0, 0.1);
+            color: #1e293b;
+        }
+
+        body.day-mode .author-link:hover {
+            background: var(--accent-pink);
+            color: white;
+        }
+
+        body.day-mode .tab {
+            color: #64748b;
+        }
+
+        body.day-mode .tab:hover {
+            color: #1e293b;
+        }
+
+        body.day-mode .tab.active {
+            color: var(--accent-pink);
+        }
+
+        body.day-mode .author-name {
+            color: #1e293b;
+        }
+
+        body.day-mode #rpgVariablesSection,
+        body.day-mode #rpgInventorySection,
+        body.day-mode #rpgSwitchesSection {
+            border-top-color: rgba(0, 0, 0, 0.08);
+        }
+
+        body.day-mode .author-section {
+            border-top-color: rgba(0, 0, 0, 0.08);
+        }
+
+        body.day-mode .theme-toggle-btn {
+            background: rgba(0, 0, 0, 0.05);
+            border-color: rgba(0, 0, 0, 0.12);
+            color: #1e293b;
+        }
+
+        body.day-mode .theme-toggle-btn:hover {
+            background: rgba(255, 58, 58, 0.08);
+            border-color: var(--accent-pink);
+        }
+
+        body.day-mode .request-banner-btn {
+            background: rgba(255, 58, 58, 0.05);
+            border-color: rgba(255, 58, 58, 0.25);
+            color: #1e293b;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        body.day-mode .request-banner-btn:hover {
+            background: rgba(255, 58, 58, 0.1);
+            border-color: var(--accent-pink);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <button id="themeToggleBtn" class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Day/Night Mode">🌙</button>
+        <h1>SF EDITOR</h1>
+        <p class="subtitle">Bypass enkripsi & edit save file (.es3 / .rpgsave) game Yakuza Rogue & RPG Maker</p>
+
+        <!-- Drop Zone -->
+        <div id="dropZone" class="drop-zone">
+            <span class="drop-icon">💾</span>
+            <div id="dropZoneText" class="drop-text">Drag & Drop save file (.es3, .rpgsave) di sini</div>
+            <div class="drop-subtext">Atau klik untuk menelusuri file dari folder</div>
+            <input type="file" id="fileInput" class="hidden-file-input" accept=".es3,.rpgsave">
+        </div>
+
+        <!-- Decrypt Section -->
+        <div id="decryptSection" style="display: none;">
+            <div class="pw-section">
+                <label for="passwordInput">Password Enkripsi (ES3)</label>
+                <div class="input-group">
+                    <input type="text" id="passwordInput" value="wanzg!1f**k" placeholder="Masukkan password ES3...">
+                    <button id="decryptBtn" class="btn">
+                        <span class="spinner" id="decryptSpinner"></span>
+                        <span>Dekripsi</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Editor Section (Initially Hidden) -->
+        <div id="editorSection" class="editor-section">
+            <div id="gameBadge" class="game-badge badge-unknown" style="margin-bottom: 25px; display: block; text-align: center;">Menilai Tipe Game...</div>
+
+            <div class="tabs">
+                <div class="tab active" id="tabHeader0" onclick="switchTab(0)">Statistik & Uang</div>
+                <div class="tab" id="tabHeader1" onclick="switchTab(1)">Kemampuan & Misi</div>
+                <div class="tab" id="tabHeader2" style="display: none;" onclick="switchTab(2)">Switch & Event</div>
+                <div class="tab" id="tabHeader3" onclick="switchTab(3)">Raw JSON</div>
+            </div>
+
+            <!-- Tab 0: Stats & Uang -->
+            <div id="tab0" class="tab-content active">
+                <div class="grid-inputs">
+                    <div class="input-item">
+                        <label for="coinInput" id="coinLabel">Uang Toko / Dojo (Coin)</label>
+                        <input type="number" id="coinInput">
+                        <span id="coinSubtext">Format koin akan disesuaikan otomatis dengan game terkait.</span>
+                    </div>
+                    <div class="input-item" id="rpgLevelContainer" style="display: none;">
+                        <label for="rpgLevelInput">Level Player</label>
+                        <input type="number" id="rpgLevelInput">
+                        <span>Level karakter utama (Actor #1).</span>
+                    </div>
+                    <div class="input-item" id="pocketMoneyContainer">
+                        <label for="myCoinInput">Uang Saku Kouta (My Coin)</label>
+                        <input type="number" id="myCoinInput">
+                        <span>Hanya untuk Yokohama Massage Parlor.</span>
+                    </div>
+                    <div class="input-item">
+                        <label for="dayInput">Hari ke- (Day)</label>
+                        <input type="number" id="dayInput">
+                        <span>Mengatur hari aktif dalam game.</span>
+                    </div>
+                    <div class="input-item">
+                        <label for="timeInput" id="timeLabel">Fase Waktu (Hour / Time)</label>
+                        <input type="number" id="timeInput">
+                        <span id="timeSubtext">Mengatur jam atau fase waktu siang/malam.</span>
+                    </div>
+                    <div class="input-item" id="developPointsContainer">
+                        <label for="devPointsInput">Research/Develop Points</label>
+                        <input type="number" id="devPointsInput">
+                        <span>Poin riset teknologi untuk upgrade toko.</span>
+                    </div>
+                    <div class="input-item">
+                        <label for="difficultySelect">Tingkat Kesulitan</label>
+                        <select id="difficultySelect">
+                            <option value="0">Normal</option>
+                            <option value="1">Hard</option>
+                        </select>
+                        <span>Tingkat kesulitan game.</span>
+                    </div>
+                    <div class="input-item" id="fishCoinContainer">
+                        <label for="fishCoinInput">Koin Mancing (Fish Coin)</label>
+                        <input type="number" id="fishCoinInput">
+                        <span>Hanya untuk Self Defense Dojo.</span>
+                    </div>
+                </div>
+
+                <!-- RPG Maker Variables Section -->
+                <div id="rpgVariablesSection" style="display: none; margin-top: 30px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 20px;">
+                    <h3 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; margin-bottom: 15px;">Daftar Variabel Game (RPG Maker)</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px;">Semua status, hubungan, level intimasi, dan status misi disimpan di variabel game. Cari ID Variabel untuk mengedit nilainya.</p>
+                    
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                        <div style="flex: 2; min-width: 200px;">
+                            <label for="varSearchInput" style="font-size: 0.75rem;">Cari / Filter ID Variabel</label>
+                            <input type="text" id="varSearchInput" placeholder="Masukkan ID atau nilai..." oninput="filterVariables()">
+                        </div>
+                        <div style="width: 120px;">
+                            <label for="varEditId" style="font-size: 0.75rem;">Edit ID</label>
+                            <input type="number" id="varEditId" placeholder="ID" oninput="loadVariableToEdit()">
+                        </div>
+                        <div style="flex: 1; min-width: 150px;">
+                            <label for="varEditValue" style="font-size: 0.75rem;">Nilai Baru</label>
+                            <input type="text" id="varEditValue" placeholder="Nilai">
+                        </div>
+                        <div style="display: flex; align-items: flex-end;">
+                            <button type="button" class="btn" onclick="applyVariableChange()" style="padding: 14px 20px;">Update</button>
+                        </div>
+                    </div>
+
+                    <div style="max-height: 250px; overflow-y: auto; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; background: rgba(0, 0, 0, 0.2); padding: 10px;">
+                        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-muted);">
+                                    <th style="padding: 8px;">ID</th>
+                                    <th style="padding: 8px;">Nilai Saat Ini</th>
+                                    <th style="padding: 8px; text-align: right;">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rpgVariablesTableBody">
+                                <!-- Dynamic rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 1: Stats & Level OR RPG Maker Item Editor -->
+            <div id="tab1" class="tab-content">
+                <div class="grid-inputs" id="yakuzaStatsContainer">
+                    <div class="input-item" id="sexLevelContainer">
+                        <label for="sexLevelInput">Sex Level</label>
+                        <input type="number" id="sexLevelInput">
+                        <span>Level intimasi karakter utama.</span>
+                    </div>
+                    <div class="input-item" id="powerLevelContainer">
+                        <label for="powerLevelInput">Power Level</label>
+                        <input type="number" id="powerLevelInput">
+                        <span>Level kekuatan tempur (fisik).</span>
+                    </div>
+                    <div class="input-item" id="skillLevelContainer">
+                        <label for="skillLevelInput">Skill Level</label>
+                        <input type="number" id="skillLevelInput">
+                        <span>Level keahlian pertahanan/teknik.</span>
+                    </div>
+                    <div class="input-item" id="workLevelContainer">
+                        <label for="workLevelInput">Work Level</label>
+                        <input type="number" id="workLevelInput">
+                        <span>Tingkat lisensi/pekerjaan.</span>
+                    </div>
+                    <div class="input-item" id="energyContainer">
+                        <label for="energyInput">Energi Saat Ini</label>
+                        <input type="number" id="energyInput">
+                        <span>Action points/stamina yang tersisa.</span>
+                    </div>
+                    <div class="input-item">
+                        <label for="failCountInput" id="failCountLabel">Gagal Misi / Event</label>
+                        <input type="number" id="failCountInput">
+                        <span id="failCountSubtext">Set ke 0 jika ingin mereset kekalahan/kegagalan.</span>
+                    </div>
+                    <div class="input-item" id="success401Container">
+                        <label for="success401Input">Total Sukses Misi 401</label>
+                        <input type="number" id="success401Input">
+                        <span>Mempengaruhi interaksi karakter di Dojo.</span>
+                    </div>
+                    <div class="input-item" id="expContainer">
+                        <label for="expInput">EXP Player</label>
+                        <input type="number" id="expInput">
+                        <span>EXP utama karakter di Dojo.</span>
+                    </div>
+                    <div class="input-item" id="isClearContainer">
+                        <label for="isClearSelect">Status Selesai Game (Is Clear)</label>
+                        <select id="isClearSelect">
+                            <option value="false">Belum Selesai (False)</option>
+                            <option value="true">Selesai (True)</option>
+                        </select>
+                        <span>Menandai apakah game sudah diselesaikan.</span>
+                    </div>
+                </div>
+
+                <!-- RPG Maker Item Editor Section -->
+                <div id="rpgInventorySection" style="display: none;">
+                    <h3 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; margin-bottom: 15px;">Penyunting Tas & Item (Inventory)</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px;">Tambahkan item, senjata, atau pelindung ke dalam tas karakter. Masukkan ID Item dan jumlahnya.</p>
+                    
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                        <div style="flex: 2; min-width: 150px;">
+                            <label for="itemSearchInput" style="font-size: 0.75rem;">Cari ID Item di Inventory</label>
+                            <input type="text" id="itemSearchInput" placeholder="Filter ID item..." oninput="filterInventory()">
+                        </div>
+                        <div style="width: 150px;">
+                            <label for="itemEditType" style="font-size: 0.75rem;">Tipe Item</label>
+                            <select id="itemEditType">
+                                <option value="item">Item Biasa</option>
+                                <option value="weapon">Senjata (Weapon)</option>
+                                <option value="armor">Pelindung (Armor)</option>
+                            </select>
+                        </div>
+                        <div style="width: 100px;">
+                            <label for="itemEditId" style="font-size: 0.75rem;">ID Item</label>
+                            <input type="number" id="itemEditId" placeholder="ID">
+                        </div>
+                        <div style="width: 100px;">
+                            <label for="itemEditQty" style="font-size: 0.75rem;">Jumlah</label>
+                            <input type="number" id="itemEditQty" placeholder="Qty" value="1">
+                        </div>
+                        <div style="display: flex; align-items: flex-end;">
+                            <button type="button" class="btn" onclick="applyInventoryChange()" style="padding: 14px 20px;">Tambah / Update</button>
+                        </div>
+                    </div>
+
+                    <div style="max-height: 250px; overflow-y: auto; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; background: rgba(0, 0, 0, 0.2); padding: 10px;">
+                        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-muted);">
+                                    <th style="padding: 8px;">Tipe</th>
+                                    <th style="padding: 8px;">ID Item</th>
+                                    <th style="padding: 8px;">Jumlah</th>
+                                    <th style="padding: 8px; text-align: right;">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rpgInventoryTableBody">
+                                <!-- Dynamic rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Switch & Event (RPG Maker only) -->
+            <div id="tab2" class="tab-content">
+                <!-- RPG Maker Switches Section -->
+                <div id="rpgSwitchesSection" style="margin-top: 10px;">
+                    <h3 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; margin-bottom: 15px;">Daftar Switch Game (RPG Maker)</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px;">Switch digunakan untuk membuka kunci event, galeri, pakaian, atau perkembangan rute cerita. Cari ID Switch untuk menyalakan/mematikan.</p>
+
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                        <div style="flex: 2; min-width: 200px;">
+                            <label for="switchSearchInput" style="font-size: 0.75rem;">Cari / Filter ID Switch</label>
+                            <input type="text" id="switchSearchInput" placeholder="Masukkan ID atau status..." oninput="filterSwitches()">
+                        </div>
+                        <div style="width: 120px;">
+                            <label for="switchEditId" style="font-size: 0.75rem;">Edit ID</label>
+                            <input type="number" id="switchEditId" placeholder="ID" oninput="loadSwitchToEdit()">
+                        </div>
+                        <div style="width: 150px; display: flex; flex-direction: column;">
+                            <label for="switchEditValue" style="font-size: 0.75rem; margin-bottom: 5px;">Status</label>
+                            <select id="switchEditValue" style="padding: 14px 16px;">
+                                <option value="true">ON (True)</option>
+                                <option value="false">OFF (False)</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; align-items: flex-end;">
+                            <button type="button" class="btn" onclick="applySwitchChange()" style="padding: 14px 20px;">Update</button>
+                        </div>
+                    </div>
+
+                    <div style="max-height: 250px; overflow-y: auto; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; background: rgba(0, 0, 0, 0.2); padding: 10px;">
+                        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-muted);">
+                                    <th style="padding: 8px;">ID</th>
+                                    <th style="padding: 8px;">Status Saat Ini</th>
+                                    <th style="padding: 8px; text-align: right;">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rpgSwitchesTableBody">
+                                <!-- Dynamic rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Raw Editor -->
+            <div id="tab3" class="tab-content">
+                <div class="input-item" style="margin-bottom: 20px;">
+                    <label for="rawJsonArea">Decrypted JSON Data</label>
+                    <textarea id="rawJsonArea" class="raw-editor" spellcheck="false"></textarea>
+                    <span>Lakukan perubahan langsung di editor teks jika ada variabel lain yang ingin diubah.</span>
+                </div>
+            </div>
+
+            <!-- Control buttons -->
+            <div class="button-bar">
+                <button id="resetBtn" class="btn btn-secondary">Edit File Baru</button>
+                <button id="encryptBtn" class="btn">
+                    <span class="spinner" id="encryptSpinner"></span>
+                    <span>Simpan & Download .ES3</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Request Game Banner Button -->
+        <a href="https://www.instagram.com/bluemountainisntit?utm_source=qr&igsh=azV5a2lrdzNvcWN1" target="_blank" class="request-banner-btn">
+            <span class="request-icon">💬</span>
+            <span class="request-text">Game kamu gak support? Mau request game? Langsung klik di sini!</span>
+        </a>
+
+        <!-- About Author Section -->
+        <div class="author-section">
+            <img src="avatar.jpg" alt="Vann" class="author-avatar-img">
+            <div class="author-info">
+                <span class="author-title">About Author</span>
+                <span class="author-name">Dibuat dengan cinta oleh <strong>Vann sepulang kerja</strong></span>
+            </div>
+            <a href="https://github.com/kipliCeviel" target="_blank" class="author-link">
+                <svg class="github-icon" viewBox="0 0 16 16" version="1.1" aria-hidden="true"><path fill="currentColor" d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.35 3.1 1.02.01.48.01.9.01 1.04 0 .21-.15.46-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8z"></path></svg>
+                <span>GitHub Profile</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <span id="toastIcon">ℹ️</span>
+        <span id="toastMsg">Notifikasi</span>
+    </div>
+
+    <script>
+        // LZString library for .rpgsave (RPG Maker MV/MZ) files
+        var LZString=function(){var r=String.fromCharCode,o="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",n="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-$",e={};function t(r,o){if(!e[r]){e[r]={};for(var n=0;n<r.length;n++)e[r][r.charAt(n)]=n}return e[r][o]}var i={compressToBase64:function(r){if(null==r)return"";var n=i._compress(r,6,function(r){return o.charAt(r)});switch(n.length%4){default:case 0:return n;case 1:return n+"===";case 2:return n+"==";case 3:return n+"="}},decompressFromBase64:function(r){return null==r?"":""==r?null:i._decompress(r.length,32,function(n){return t(o,r.charAt(n))})},compressToUTF16:function(o){return null==o?"":i._compress(o,15,function(o){return r(o+32)})+" "},decompressFromUTF16:function(r){return null==r?"":""==r?null:i._decompress(r.length,16384,function(o){return r.charCodeAt(o)-32})},compressToUint8Array:function(r){for(var o=i.compress(r),n=new Uint8Array(2*o.length),e=0,t=o.length;e<t;e++){var s=o.charCodeAt(e);n[2*e]=s>>>8,n[2*e+1]=s%256}return n},decompressFromUint8Array:function(o){if(null==o)return i.decompress(o);for(var n=new Array(o.length/2),e=0,t=n.length;e<t;e++)n[e]=256*o[2*e]+o[2*e+1];var s=[];return n.forEach(function(o){s.push(r(o))}),i.decompress(s.join(""))},compressToEncodedURIComponent:function(r){return null==r?"":i._compress(r,6,function(r){return n.charAt(r)})},decompressFromEncodedURIComponent:function(r){return null==r?"":""==r?null:(r=r.replace(/ /g,"+"),i._decompress(r.length,32,function(o){return t(n,r.charAt(o))}))},compress:function(o){return i._compress(o,16,function(o){return r(o)})},_compress:function(r,o,n){if(null==r)return"";var e,t,i,s={},u={},a="",p="",c="",l=2,f=3,h=2,d=[],m=0,v=0;for(i=0;i<r.length;i+=1)if(a=r.charAt(i),Object.prototype.hasOwnProperty.call(s,a)||(s[a]=f++,u[a]=!0),p=c+a,Object.prototype.hasOwnProperty.call(s,p))c=p;else{if(Object.prototype.hasOwnProperty.call(u,c)){if(c.charCodeAt(0)<256){for(e=0;e<h;e++)m<<=1,v==o-1?(v=0,d.push(n(m)),m=0):v++;for(t=c.charCodeAt(0),e=0;e<8;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}else{for(t=1,e=0;e<h;e++)m=m<<1|t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t=0;for(t=c.charCodeAt(0),e=0;e<16;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}0==--l&&(l=Math.pow(2,h),h++),delete u[c]}else for(t=s[c],e=0;e<h;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1;0==--l&&(l=Math.pow(2,h),h++),s[p]=f++,c=String(a)}if(""!==c){if(Object.prototype.hasOwnProperty.call(u,c)){if(c.charCodeAt(0)<256){for(e=0;e<h;e++)m<<=1,v==o-1?(v=0,d.push(n(m)),m=0):v++;for(t=c.charCodeAt(0),e=0;e<8;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}else{for(t=1,e=0;e<h;e++)m=m<<1|t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t=0;for(t=c.charCodeAt(0),e=0;e<16;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1}0==--l&&(l=Math.pow(2,h),h++),delete u[c]}else for(t=s[c],e=0;e<h;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1;0==--l&&(l=Math.pow(2,h),h++)}for(t=2,e=0;e<h;e++)m=m<<1|1&t,v==o-1?(v=0,d.push(n(m)),m=0):v++,t>>=1;for(;;){if(m<<=1,v==o-1){d.push(n(m));break}v++}return d.join("")},decompress:function(r){return null==r?"":""==r?null:i._decompress(r.length,32768,function(o){return r.charCodeAt(o)})},_decompress:function(o,n,e){var t,i,s,u,a,p,c,l=[],f=4,h=4,d=3,m="",v=[],g={val:e(0),position:n,index:1};for(t=0;t<3;t+=1)l[t]=t;for(s=0,a=Math.pow(2,2),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;switch(s){case 0:for(s=0,a=Math.pow(2,8),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;c=r(s);break;case 1:for(s=0,a=Math.pow(2,16),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;c=r(s);break;case 2:return""}for(l[3]=c,i=c,v.push(c);;){if(g.index>o)return"";for(s=0,a=Math.pow(2,d),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;switch(c=s){case 0:for(s=0,a=Math.pow(2,8),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;l[h++]=r(s),c=h-1,f--;break;case 1:for(s=0,a=Math.pow(2,16),p=1;p!=a;)u=g.val&g.position,g.position>>=1,0==g.position&&(g.position=n,g.val=e(g.index++)),s|=(u>0?1:0)*p,p<<=1;l[h++]=r(s),c=h-1,f--;break;case 2:return v.join("")}if(0==f&&(f=Math.pow(2,d),d++),l[c])m=l[c];else{if(c!==h)return null;m=i+i.charAt(0)}v.push(m),l[h++]=i+m.charAt(0),i=m,0==--f&&(f=Math.pow(2,d),d++)}}};return i}();
+
+        let selectedFormat = null; // "es3" or "rpgsave"
+        let selectedFile = null;
+        let fileData = null; // Uint8Array or string
+        let decryptedJSON = null; // Object
+        let wasGzipped = false;
+        let detectedGame = "unknown";
+
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const decryptSection = document.getElementById('decryptSection');
+        const editorSection = document.getElementById('editorSection');
+        const gameBadge = document.getElementById('gameBadge');
+        const passwordInput = document.getElementById('passwordInput');
+        const decryptBtn = document.getElementById('decryptBtn');
+        const decryptSpinner = document.getElementById('decryptSpinner');
+        const encryptBtn = document.getElementById('encryptBtn');
+        const encryptSpinner = document.getElementById('encryptSpinner');
+        const resetBtn = document.getElementById('resetBtn');
+
+        // Toggle Day/Night Mode Theme
+        function toggleTheme() {
+            const body = document.body;
+            const btn = document.getElementById('themeToggleBtn');
+            body.classList.toggle('day-mode');
+            if (body.classList.contains('day-mode')) {
+                btn.textContent = '☀️';
+                localStorage.setItem('theme', 'day');
+                showToast("Mode Terang Aktif");
+            } else {
+                btn.textContent = '🌙';
+                localStorage.setItem('theme', 'night');
+                showToast("Mode Gelap Aktif");
+            }
+        }
+
+        // Load theme on startup
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'day') {
+                document.body.classList.add('day-mode');
+                document.getElementById('themeToggleBtn').textContent = '☀️';
+            }
+        });
+
+        // Drag & Drop
+        dropZone.addEventListener('click', () => fileInput.click());
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            const isRpgSave = file.name.endsWith('.rpgsave');
+            const isEs3Save = file.name.endsWith('.es3');
+
+            if (!isRpgSave && !isEs3Save) {
+                showToast("Format file harus berupa .es3 atau .rpgsave!", "error");
+                return;
+            }
+
+            selectedFormat = isRpgSave ? 'rpgsave' : 'es3';
+            selectedFile = file;
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                if (selectedFormat === 'rpgsave') {
+                    const text = e.target.result;
+                    try {
+                        const decompressed = LZString.decompressFromBase64(text);
+                        if (!decompressed) {
+                            showToast("Gagal mendekompresi file .rpgsave! Format tidak cocok.", "error");
+                            return;
+                        }
+                        decryptedJSON = JSON.parse(decompressed);
+                        
+                        dropZone.style.display = 'none';
+                        decryptSection.style.display = 'none';
+                        editorSection.style.display = 'block';
+                        
+                        let type = "countryside";
+                        if (file.name.toLowerCase().includes('sister') || file.name.toLowerCase().includes('unobtrusive')) {
+                            type = "sister";
+                        } else if (decryptedJSON.system && decryptedJSON.system._gameTitle) {
+                            const title = decryptedJSON.system._gameTitle.toLowerCase();
+                            if (title.includes('sister') || title.includes('unobtrusive') || title.includes('simple life')) {
+                                type = "sister";
+                            }
+                        }
+                        setGameBadge(type);
+                        
+                        showToast(`Berhasil memuat file RPG Maker: ${file.name}`);
+                        setupEditorForm();
+                    } catch (err) {
+                        console.error(err);
+                        showToast("Gagal memproses file .rpgsave! Pastikan format file valid.", "error");
+                    }
+                } else {
+                    fileData = new Uint8Array(e.target.result);
+                    const defaultPassword = "wanzg!1f**k";
+                    attemptAutoDecrypt(defaultPassword, file);
+                }
+            };
+
+            if (selectedFormat === 'rpgsave') {
+                reader.readAsText(file);
+            } else {
+                reader.readAsArrayBuffer(file);
+            }
+        }
+
+        async function attemptAutoDecrypt(password, file) {
+            try {
+                const decResult = await decryptES3(fileData, password);
+                wasGzipped = decResult.wasGzipped;
+
+                const cleanedText = preprocess_es3_json(decResult.text);
+                decryptedJSON = JSON.parse(cleanedText);
+
+                let type = "unknown";
+                const hasKeyVal = decryptedJSON.key && decryptedJSON.key.value;
+                if (hasKeyVal) {
+                    const val = decryptedJSON.key.value;
+                    if ('sex_level' in val || 'power_level' in val || 'teach_step' in val || 'fish_coin' in val || 'total_success_401_count' in val) {
+                        type = "dojo";
+                    } else if ('coin' in val && !val.coin.i && 'my_coin' in val) {
+                        type = "massage";
+                    } else if ('my_coin' in val || 'develop_point' in val || 'task_fail_count' in val) {
+                        type = "massage";
+                    }
+                }
+                
+                if (type === "unknown") {
+                    if (file.name.toLowerCase().includes('dojo') || (file.name.toLowerCase().includes('user_data') && fileData.length < 8000)) {
+                        type = "dojo";
+                    } else if (file.name.toLowerCase().includes('massage') || fileData.length > 10000) {
+                        type = "massage";
+                    }
+                }
+
+                setGameBadge(type);
+                
+                dropZone.style.display = 'none';
+                decryptSection.style.display = 'none';
+                editorSection.style.display = 'block';
+
+                showToast(`File berhasil didekripsi otomatis!`);
+                setupEditorForm();
+            } catch (err) {
+                console.log("Auto-decryption failed, showing manual decrypt panel:", err);
+                passwordInput.value = password;
+                dropZone.style.display = 'none';
+                decryptSection.style.display = 'block';
+                
+                let type = "unknown";
+                if (file.name.toLowerCase().includes('dojo') || (file.name.toLowerCase().includes('user_data') && fileData.length < 8000)) {
+                    type = "dojo";
+                } else if (file.name.toLowerCase().includes('massage') || fileData.length > 10000) {
+                    type = "massage";
+                }
+                setGameBadge(type);
+                
+                showToast("Gagal dekripsi otomatis. Silakan masukkan password manual.", "error");
+            }
+        }
+
+        function setGameBadge(type) {
+            detectedGame = type;
+            gameBadge.className = 'game-badge';
+
+            if (type === "massage") {
+                gameBadge.textContent = "Game Terdeteksi: Yokohama Massage Parlor (Yakuza Rogue 2)";
+                gameBadge.classList.add('badge-massage');
+            } else if (type === "dojo") {
+                gameBadge.textContent = "Game Terdeteksi: Self Defense Dojo (Yakuza Rogue 1)";
+                gameBadge.classList.add('badge-dojo');
+            } else if (type === "countryside") {
+                gameBadge.textContent = "Game Terdeteksi: The Daily Life in My Countryside";
+                gameBadge.classList.add('badge-countryside');
+            } else if (type === "sister") {
+                gameBadge.textContent = "Game Terdeteksi: A Simple Life with My Unobtrusive Sister";
+                gameBadge.classList.add('badge-sister');
+            } else {
+                gameBadge.textContent = "Game Tidak Dikenali";
+                gameBadge.classList.add('badge-unknown');
+            }
+        }
+
+        function preprocess_es3_json(jsonStr) {
+            return jsonStr.replace(/([{,]\s*)([0-9]+)\s*:/g, '$1"$2":');
+        }
+
+        function postprocess_es3_json(jsonStr) {
+            return jsonStr.replace(/([{,]\s*)"([0-9]+)"\s*:/g, '$1$2:');
+        }
+
+        async function decompressGzip(arrayBuffer) {
+            const blob = new Blob([arrayBuffer]);
+            const ds = new DecompressionStream('gzip');
+            const stream = blob.stream().pipeThrough(ds);
+            const response = new Response(stream);
+            return await response.arrayBuffer();
+        }
+
+        async function compressGzip(arrayBuffer) {
+            const blob = new Blob([arrayBuffer]);
+            const cs = new CompressionStream('gzip');
+            const stream = blob.stream().pipeThrough(cs);
+            const response = new Response(stream);
+            return await response.arrayBuffer();
+        }
+
+        async function decryptES3(dataBytes, password) {
+            const iv = dataBytes.subarray(0, 16);
+            const ciphertext = dataBytes.subarray(16);
+
+            const pwEncoder = new TextEncoder().encode(password);
+            const baseKey = await window.crypto.subtle.importKey("raw", pwEncoder, "PBKDF2", false, ["deriveKey"]);
+
+            const derivedKey = await window.crypto.subtle.deriveKey({name: "PBKDF2", salt: iv, iterations: 100, hash: "SHA-1"}, baseKey, {name: "AES-CBC", length: 128}, false, ["decrypt"]);
+
+            let decryptedBuffer = await window.crypto.subtle.decrypt({name: "AES-CBC", iv: iv}, derivedKey, ciphertext);
+
+            const headerBytes = new Uint8Array(decryptedBuffer, 0, 2);
+            let wasGzipped = false;
+            if (headerBytes[0] === 0x1F && headerBytes[1] === 0x8B) {
+                wasGzipped = true;
+                decryptedBuffer = await decompressGzip(decryptedBuffer);
+            }
+
+            const textDecoder = new TextDecoder('utf-8');
+            return { text: textDecoder.decode(decryptedBuffer), wasGzipped };
+        }
+
+        async function encryptES3(text, password, compress) {
+            let dataBytes = new TextEncoder().encode(text);
+            if (compress) {
+                dataBytes = new Uint8Array(await compressGzip(dataBytes));
+            }
+
+            const iv = window.crypto.getRandomValues(new Uint8Array(16));
+            const pwEncoder = new TextEncoder().encode(password);
+            const baseKey = await window.crypto.subtle.importKey("raw", pwEncoder, "PBKDF2", false, ["deriveKey"]);
+
+            const derivedKey = await window.crypto.subtle.deriveKey({name: "PBKDF2", salt: iv, iterations: 100, hash: "SHA-1"}, baseKey, {name: "AES-CBC", length: 128}, false, ["encrypt"]);
+
+            const encryptedBuffer = await window.crypto.subtle.encrypt({name: "AES-CBC", iv: iv}, derivedKey, dataBytes);
+
+            const finalBytes = new Uint8Array(16 + encryptedBuffer.byteLength);
+            finalBytes.set(iv, 0);
+            finalBytes.set(new Uint8Array(encryptedBuffer), 16);
+            return finalBytes;
+        }
+
+        decryptBtn.addEventListener('click', async () => {
+            const password = passwordInput.value;
+            if (!password) {
+                showToast("Password tidak boleh kosong!", "error");
+                return;
+            }
+
+            decryptSpinner.style.display = 'inline-block';
+            decryptBtn.disabled = true;
+
+            try {
+                const decResult = await decryptES3(fileData, password);
+                wasGzipped = decResult.wasGzipped;
+
+                const cleanedText = preprocess_es3_json(decResult.text);
+                decryptedJSON = JSON.parse(cleanedText);
+
+                decryptSpinner.style.display = 'none';
+                decryptBtn.disabled = false;
+                decryptSection.style.display = 'none';
+                editorSection.style.display = 'block';
+
+                showToast("File berhasil didekripsi!");
+                setupEditorForm();
+            } catch (err) {
+                console.error(err);
+                decryptSpinner.style.display = 'none';
+                decryptBtn.disabled = false;
+                showToast("Gagal mendekripsi file! Pastikan password benar.", "error");
+            }
+        });
+
+        function setupEditorForm() {
+            const rawArea = document.getElementById('rawJsonArea');
+            rawArea.value = JSON.stringify(decryptedJSON, null, 4);
+
+            const isRpgMaker = (selectedFormat === 'rpgsave');
+
+            const pocketMoneyContainer = document.getElementById('pocketMoneyContainer');
+            const devPointsContainer = document.getElementById('developPointsContainer');
+            const sexLevelContainer = document.getElementById('sexLevelContainer');
+            const powerLevelContainer = document.getElementById('powerLevelContainer');
+            const skillLevelContainer = document.getElementById('skillLevelContainer');
+            const workLevelContainer = document.getElementById('workLevelContainer');
+            const energyContainer = document.getElementById('energyContainer');
+            const fishCoinContainer = document.getElementById('fishCoinContainer');
+            const success401Container = document.getElementById('success401Container');
+            const expContainer = document.getElementById('expContainer');
+            const isClearContainer = document.getElementById('isClearContainer');
+            
+            const difficultySelectContainer = document.getElementById('difficultySelect').parentNode;
+            const dayInputContainer = document.getElementById('dayInput').parentNode;
+            const timeInputContainer = document.getElementById('timeInput').parentNode;
+            const failCountContainer = document.getElementById('failCountInput').parentNode;
+            
+            const coinLabel = document.getElementById('coinLabel');
+            const timeLabel = document.getElementById('timeLabel');
+            const failCountLabel = document.getElementById('failCountLabel');
+
+            const rpgLevelContainer = document.getElementById('rpgLevelContainer');
+            const rpgVariablesSection = document.getElementById('rpgVariablesSection');
+            const rpgInventorySection = document.getElementById('rpgInventorySection');
+            const rpgSwitchesSection = document.getElementById('rpgSwitchesSection');
+            const yakuzaStatsContainer = document.getElementById('yakuzaStatsContainer');
+            
+            const tabHeader0 = document.getElementById('tabHeader0');
+            const tabHeader1 = document.getElementById('tabHeader1');
+            const tabHeader2 = document.getElementById('tabHeader2');
+            const tabHeader3 = document.getElementById('tabHeader3');
+            const encryptBtnSpan = document.getElementById('encryptBtn').querySelector('span:not(.spinner)');
+
+            if (isRpgMaker) {
+                tabHeader0.textContent = "Uang & Variabel";
+                tabHeader1.textContent = "Tas & Item (Inventory)";
+                tabHeader2.style.display = "block";
+                tabHeader3.textContent = "Raw JSON";
+
+                pocketMoneyContainer.style.display = 'none';
+                devPointsContainer.style.display = 'none';
+                sexLevelContainer.style.display = 'none';
+                powerLevelContainer.style.display = 'none';
+                skillLevelContainer.style.display = 'none';
+                workLevelContainer.style.display = 'none';
+                energyContainer.style.display = 'none';
+                fishCoinContainer.style.display = 'none';
+                success401Container.style.display = 'none';
+                expContainer.style.display = 'none';
+                isClearContainer.style.display = 'none';
+                
+                difficultySelectContainer.style.display = 'none';
+                dayInputContainer.style.display = 'none';
+                timeInputContainer.style.display = 'none';
+                failCountContainer.style.display = 'none';
+                
+                yakuzaStatsContainer.style.display = 'none';
+                rpgLevelContainer.style.display = 'flex';
+                rpgVariablesSection.style.display = 'block';
+                rpgInventorySection.style.display = 'block';
+                rpgSwitchesSection.style.display = 'block';
+                
+                coinLabel.textContent = "Emas (Gold)";
+                document.getElementById('coinSubtext').textContent = "Mengatur jumlah uang (emas) utama dalam game.";
+                encryptBtnSpan.textContent = "Simpan & Download .RPGSAVE";
+
+                const gold = (decryptedJSON.party && typeof decryptedJSON.party._gold === 'number') ? decryptedJSON.party._gold : 0;
+                document.getElementById('coinInput').value = gold;
+
+                const actor1 = (decryptedJSON.actors && decryptedJSON.actors._data && decryptedJSON.actors._data[1]) ? decryptedJSON.actors._data[1] : null;
+                document.getElementById('rpgLevelInput').value = actor1 ? (actor1._level || 1) : 1;
+
+                renderRpgVariablesTable();
+                renderRpgInventoryTable();
+                renderRpgSwitchesTable();
+                return;
+            }
+
+            tabHeader0.textContent = "Statistik & Uang";
+            tabHeader1.textContent = "Kemampuan & Misi";
+            tabHeader2.style.display = "none";
+            tabHeader3.textContent = "Raw JSON";
+
+            difficultySelectContainer.style.display = 'flex';
+            dayInputContainer.style.display = 'flex';
+            timeInputContainer.style.display = 'flex';
+            failCountContainer.style.display = 'flex';
+            
+            yakuzaStatsContainer.style.display = 'flex';
+            rpgLevelContainer.style.display = 'none';
+            rpgVariablesSection.style.display = 'none';
+            rpgInventorySection.style.display = 'none';
+            rpgSwitchesSection.style.display = 'none';
+            document.getElementById('coinSubtext').textContent = "Format koin akan disesuaikan otomatis dengan game terkait.";
+            encryptBtnSpan.textContent = "Simpan & Download .ES3";
+
+            const hasKeyVal = decryptedJSON.key && decryptedJSON.key.value;
+            if (!hasKeyVal) {
+                showToast("Format JSON di luar dugaan, silakan edit melalui tab Raw JSON.", "error");
+                switchTab(3);
+                return;
+            }
+
+            const val = decryptedJSON.key.value;
+
+            if (detectedGame === "unknown") {
+                if ('sex_level' in val || 'power_level' in val || 'teach_step' in val || 'fish_coin' in val || 'total_success_401_count' in val) {
+                    setGameBadge("dojo");
+                } else if ('coin' in val && !val.coin.i && 'my_coin' in val) {
+                    setGameBadge("massage");
+                } else if ('my_coin' in val || 'develop_point' in val) {
+                    setGameBadge("massage");
+                }
+            }
+
+            if (detectedGame === "dojo") {
+                pocketMoneyContainer.style.display = 'none';
+                devPointsContainer.style.display = 'none';
+                sexLevelContainer.style.display = 'flex';
+                powerLevelContainer.style.display = 'flex';
+                skillLevelContainer.style.display = 'flex';
+                workLevelContainer.style.display = 'flex';
+                energyContainer.style.display = 'flex';
+                fishCoinContainer.style.display = 'flex';
+                success401Container.style.display = 'flex';
+                expContainer.style.display = 'flex';
+                isClearContainer.style.display = 'flex';
+                
+                coinLabel.textContent = "Uang (Coins)";
+                timeLabel.textContent = "Jam Aktif (Hour)";
+                failCountLabel.textContent = "Total Gagal Misi 401";
+
+                document.getElementById('coinInput').value = (typeof val.coin === 'object' && val.coin !== null) ? val.coin.i : (val.coin || 0);
+                document.getElementById('dayInput').value = val.day || 1;
+                document.getElementById('timeInput').value = val.hour || 9;
+                document.getElementById('difficultySelect').value = val.difficulty || 0;
+                document.getElementById('sexLevelInput').value = val.sex_level || 0;
+                document.getElementById('powerLevelInput').value = val.power_level || 0;
+                document.getElementById('skillLevelInput').value = val.skill_level || 0;
+                document.getElementById('workLevelInput').value = val.work_level || 0;
+                document.getElementById('energyInput').value = val.energy || 100;
+                document.getElementById('failCountInput').value = val.total_failed_401_count || 0;
+                document.getElementById('fishCoinInput').value = val.fish_coin || 0;
+                document.getElementById('success401Input').value = val.total_success_401_count || 0;
+                document.getElementById('expInput').value = val.exp || 0;
+                document.getElementById('isClearSelect').value = val.is_clear ? "true" : "false";
+            } else {
+                pocketMoneyContainer.style.display = 'flex';
+                devPointsContainer.style.display = 'flex';
+                sexLevelContainer.style.display = 'none';
+                powerLevelContainer.style.display = 'none';
+                skillLevelContainer.style.display = 'none';
+                workLevelContainer.style.display = 'none';
+                energyContainer.style.display = 'none';
+                fishCoinContainer.style.display = 'none';
+                success401Container.style.display = 'none';
+                expContainer.style.display = 'none';
+                isClearContainer.style.display = 'none';
+                
+                coinLabel.textContent = "Uang Toko (Parlor Coin)";
+                timeLabel.textContent = "Fase Waktu (Time)";
+                failCountLabel.textContent = "Total Gagal Misi/Tugas";
+
+                document.getElementById('coinInput').value = val.coin || 0;
+                document.getElementById('myCoinInput').value = val.my_coin || 0;
+                document.getElementById('dayInput').value = val.day || 1;
+                document.getElementById('timeInput').value = val.time || 0;
+                document.getElementById('devPointsInput').value = val.develop_point || 0;
+                document.getElementById('difficultySelect').value = val.difficulty || 0;
+                document.getElementById('failCountInput').value = val.task_fail_count || 0;
+            }
+        }
+
+        function renderRpgVariablesTable() {
+            const tableBody = document.getElementById('rpgVariablesTableBody');
+            tableBody.innerHTML = '';
+            
+            if (!decryptedJSON.variables || !decryptedJSON.variables._data) {
+                tableBody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 10px; color: var(--text-muted);">Data variabel tidak ditemukan</td></tr>';
+                return;
+            }
+            
+            const data = decryptedJSON.variables._data;
+            const filterText = document.getElementById('varSearchInput').value.toLowerCase();
+            
+            let count = 0;
+            for (let i = 1; i < data.length; i++) {
+                const val = data[i];
+                const isMatch = !filterText || i.toString().includes(filterText) || (val !== null && val !== undefined && val.toString().toLowerCase().includes(filterText));
+                const shouldDisplay = isMatch && (filterText || (val !== null && val !== undefined && val !== 0 && val !== ""));
+                
+                if (shouldDisplay) {
+                    count++;
+                    const row = document.createElement('tr');
+                    row.style.borderBottom = '1px solid rgba(255, 255, 255, 0.05)';
+                    row.innerHTML = `
+                        <td style="padding: 8px; font-weight: bold; color: var(--accent-pink);">#${i}</td>
+                        <td style="padding: 8px; color: var(--text-main); max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${val === null ? 'null' : val}</td>
+                        <td style="padding: 8px; text-align: right;">
+                            <button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem; text-transform: none; letter-spacing: 0;" onclick="selectVariableToEdit(${i})">Edit</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                }
+            }
+            
+            if (count === 0) {
+                tableBody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 10px; color: var(--text-muted);">Tidak ada variabel aktif yang cocok dengan filter</td></tr>';
+            }
+        }
+        
+        function selectVariableToEdit(id) {
+            document.getElementById('varEditId').value = id;
+            loadVariableToEdit();
+            document.getElementById('varEditValue').focus();
+        }
+        
+        function loadVariableToEdit() {
+            const id = parseInt(document.getElementById('varEditId').value);
+            const valInput = document.getElementById('varEditValue');
+            if (isNaN(id) || !decryptedJSON.variables || !decryptedJSON.variables._data) {
+                valInput.value = '';
+                return;
+            }
+            const data = decryptedJSON.variables._data;
+            if (id >= 1 && id < data.length) {
+                const val = data[id];
+                valInput.value = val === null ? '' : val;
+            } else {
+                valInput.value = '';
+            }
+        }
+
+        function applyVariableChange() {
+            const id = parseInt(document.getElementById('varEditId').value);
+            let rawVal = document.getElementById('varEditValue').value;
+            
+            if (isNaN(id) || id < 1) {
+                showToast("ID Variabel tidak valid!", "error");
+                return;
+            }
+            
+            if (!decryptedJSON.variables || !decryptedJSON.variables._data) {
+                showToast("Data variabel game tidak ditemukan!", "error");
+                return;
+            }
+            
+            let data = decryptedJSON.variables._data;
+            while (data.length <= id) {
+                data.push(null);
+            }
+            
+            let parsedVal = rawVal;
+            if (rawVal.trim() === '') {
+                parsedVal = null;
+            } else if (rawVal.toLowerCase() === 'true') {
+                parsedVal = true;
+            } else if (rawVal.toLowerCase() === 'false') {
+                parsedVal = false;
+            } else if (!isNaN(rawVal) && rawVal.indexOf('.') === -1) {
+                parsedVal = parseInt(rawVal);
+            } else if (!isNaN(rawVal)) {
+                parsedVal = parseFloat(rawVal);
+            }
+            
+            data[id] = parsedVal;
+            renderRpgVariablesTable();
+            showToast(`Variabel #${id} berhasil diupdate ke: ${parsedVal}`);
+            
+            document.getElementById('rawJsonArea').value = JSON.stringify(decryptedJSON, null, 4);
+        }
+        
+        function filterVariables() {
+            renderRpgVariablesTable();
+        }
+
+        function renderRpgInventoryTable() {
+            const tableBody = document.getElementById('rpgInventoryTableBody');
+            tableBody.innerHTML = '';
+            
+            if (!decryptedJSON.party) {
+                tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 10px; color: var(--text-muted);">Data inventory tidak ditemukan</td></tr>';
+                return;
+            }
+            
+            const filterText = document.getElementById('itemSearchInput').value.toLowerCase();
+            const items = decryptedJSON.party._items || {};
+            const weapons = decryptedJSON.party._weapons || {};
+            const armors = decryptedJSON.party._armors || {};
+            
+            let count = 0;
+            
+            const addRow = (type, id, qty) => {
+                const typeLabel = type === 'item' ? '📦 Item' : (type === 'weapon' ? '⚔️ Senjata' : '🛡️ Pelindung');
+                const isMatch = !filterText || id.toString().includes(filterText) || typeLabel.toLowerCase().includes(filterText);
+                if (isMatch) {
+                    count++;
+                    const row = document.createElement('tr');
+                    row.style.borderBottom = '1px solid rgba(255, 255, 255, 0.05)';
+                    row.innerHTML = `
+                        <td style="padding: 8px; color: var(--text-muted);">${typeLabel}</td>
+                        <td style="padding: 8px; font-weight: bold; color: var(--accent-pink);">ID #${id}</td>
+                        <td style="padding: 8px; color: var(--text-main);">${qty}</td>
+                        <td style="padding: 8px; text-align: right; display: flex; gap: 5px; justify-content: flex-end;">
+                            <button type="button" class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.75rem; text-transform: none; letter-spacing: 0;" onclick="selectItemToEdit('${type}', ${id}, ${qty})">Edit</button>
+                            <button type="button" class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.75rem; text-transform: none; letter-spacing: 0; background: rgba(255,0,0,0.1); border-color: rgba(255,0,0,0.2); color: #ff5555;" onclick="deleteInventoryItem('${type}', '${id}')">Hapus</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                }
+            };
+            
+            for (const id in items) addRow('item', id, items[id]);
+            for (const id in weapons) addRow('weapon', id, weapons[id]);
+            for (const id in armors) addRow('armor', id, armors[id]);
+            
+            if (count === 0) {
+                tableBody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding: 10px; color: var(--text-muted);">Inventory kosong atau tidak cocok dengan filter</td></tr>';
+            }
+        }
+
+        function selectItemToEdit(type, id, qty) {
+            document.getElementById('itemEditType').value = type;
+            document.getElementById('itemEditId').value = id;
+            document.getElementById('itemEditQty').value = qty;
+        }
+
+        function applyInventoryChange() {
+            const type = document.getElementById('itemEditType').value;
+            const id = document.getElementById('itemEditId').value.trim();
+            const qty = parseInt(document.getElementById('itemEditQty').value) || 0;
+            
+            if (!id || isNaN(parseInt(id))) {
+                showToast("ID Item harus diisi dengan angka!", "error");
+                return;
+            }
+            
+            if (!decryptedJSON.party) {
+                showToast("Data party tidak ditemukan!", "error");
+                return;
+            }
+            
+            if (type === 'item') {
+                if (!decryptedJSON.party._items) decryptedJSON.party._items = {};
+                if (qty <= 0) delete decryptedJSON.party._items[id];
+                else decryptedJSON.party._items[id] = qty;
+            } else if (type === 'weapon') {
+                if (!decryptedJSON.party._weapons) decryptedJSON.party._weapons = {};
+                if (qty <= 0) delete decryptedJSON.party._weapons[id];
+                else decryptedJSON.party._weapons[id] = qty;
+            } else if (type === 'armor') {
+                if (!decryptedJSON.party._armors) decryptedJSON.party._armors = {};
+                if (qty <= 0) delete decryptedJSON.party._armors[id];
+                else decryptedJSON.party._armors[id] = qty;
+            }
+            
+            renderRpgInventoryTable();
+            showToast(`Item #${id} (${type}) diperbarui ke jumlah: ${qty}`);
+            document.getElementById('rawJsonArea').value = JSON.stringify(decryptedJSON, null, 4);
+        }
+
+        function deleteInventoryItem(type, id) {
+            if (!decryptedJSON.party) return;
+            if (type === 'item' && decryptedJSON.party._items) delete decryptedJSON.party._items[id];
+            else if (type === 'weapon' && decryptedJSON.party._weapons) delete decryptedJSON.party._weapons[id];
+            else if (type === 'armor' && decryptedJSON.party._armors) delete decryptedJSON.party._armors[id];
+            renderRpgInventoryTable();
+            showToast(`Item #${id} dihapus dari tas.`);
+            document.getElementById('rawJsonArea').value = JSON.stringify(decryptedJSON, null, 4);
+        }
+
+        function filterInventory() {
+            renderRpgInventoryTable();
+        }
+
+        function renderRpgSwitchesTable() {
+            const tableBody = document.getElementById('rpgSwitchesTableBody');
+            tableBody.innerHTML = '';
+            
+            if (!decryptedJSON.switches || !decryptedJSON.switches._data) {
+                tableBody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 10px; color: var(--text-muted);">Data switch tidak ditemukan</td></tr>';
+                return;
+            }
+            
+            const data = decryptedJSON.switches._data;
+            const filterText = document.getElementById('switchSearchInput').value.toLowerCase();
+            
+            let count = 0;
+            for (let i = 1; i < data.length; i++) {
+                const val = data[i];
+                const valText = val ? 'on' : 'off';
+                const isMatch = !filterText || i.toString().includes(filterText) || valText.includes(filterText);
+                const shouldDisplay = isMatch && (filterText || val === true);
+                
+                if (shouldDisplay) {
+                    count++;
+                    const row = document.createElement('tr');
+                    row.style.borderBottom = '1px solid rgba(255, 255, 255, 0.05)';
+                    row.innerHTML = `
+                        <td style="padding: 8px; font-weight: bold; color: var(--accent-purple);">#${i}</td>
+                        <td style="padding: 8px; color: ${val ? '#2ecc71' : 'var(--text-muted)'}; font-weight: 600;">${val ? 'ON (True)' : 'OFF (False)'}</td>
+                        <td style="padding: 8px; text-align: right;">
+                            <button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem; text-transform: none; letter-spacing: 0;" onclick="selectSwitchToEdit(${i})">Edit</button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                }
+            }
+            
+            if (count === 0) {
+                tableBody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 10px; color: var(--text-muted);">Tidak ada switch aktif yang cocok dengan filter</td></tr>';
+            }
+        }
+        
+        function selectSwitchToEdit(id) {
+            document.getElementById('switchEditId').value = id;
+            loadSwitchToEdit();
+        }
+        
+        function loadSwitchToEdit() {
+            const id = parseInt(document.getElementById('switchEditId').value);
+            const valSelect = document.getElementById('switchEditValue');
+            if (isNaN(id) || !decryptedJSON.switches || !decryptedJSON.switches._data) {
+                return;
+            }
+            const data = decryptedJSON.switches._data;
+            if (id >= 1 && id < data.length) {
+                const val = data[id];
+                valSelect.value = val ? "true" : "false";
+            }
+        }
+        
+        function applySwitchChange() {
+            const id = parseInt(document.getElementById('switchEditId').value);
+            const val = document.getElementById('switchEditValue').value === "true";
+            
+            if (isNaN(id) || id < 1) {
+                showToast("ID Switch tidak valid!", "error");
+                return;
+            }
+            
+            if (!decryptedJSON.switches || !decryptedJSON.switches._data) {
+                showToast("Data switch game tidak ditemukan!", "error");
+                return;
+            }
+            
+            let data = decryptedJSON.switches._data;
+            while (data.length <= id) {
+                data.push(false);
+            }
+            
+            data[id] = val;
+            renderRpgSwitchesTable();
+            showToast(`Switch #${id} berhasil diubah ke: ${val ? 'ON (True)' : 'OFF (False)'}`);
+            document.getElementById('rawJsonArea').value = JSON.stringify(decryptedJSON, null, 4);
+        }
+        
+        function filterSwitches() {
+            renderRpgSwitchesTable();
+        }
+
+        function collectFormData() {
+            const isRpgMaker = (selectedFormat === 'rpgsave');
+            if (isRpgMaker) {
+                const enteredGold = parseInt(document.getElementById('coinInput').value) || 0;
+                if (decryptedJSON.party) {
+                    decryptedJSON.party._gold = enteredGold;
+                }
+                const actor1 = (decryptedJSON.actors && decryptedJSON.actors._data && decryptedJSON.actors._data[1]) ? decryptedJSON.actors._data[1] : null;
+                if (actor1) {
+                    actor1._level = parseInt(document.getElementById('rpgLevelInput').value) || 1;
+                }
+                
+                document.getElementById('rawJsonArea').value = JSON.stringify(decryptedJSON, null, 4);
+                return;
+            }
+
+            const hasKeyVal = decryptedJSON.key && decryptedJSON.key.value;
+            if (!hasKeyVal) return;
+
+            const val = decryptedJSON.key.value;
+
+            if (detectedGame === "dojo") {
+                const enteredCoins = parseInt(document.getElementById('coinInput').value) || 0;
+                if (typeof val.coin === 'object' && val.coin !== null) {
+                    val.coin.i = enteredCoins;
+                } else {
+                    val.coin = { i: enteredCoins };
+                }
+                val.day = parseInt(document.getElementById('dayInput').value) || 1;
+                val.hour = parseInt(document.getElementById('timeInput').value) || 9;
+                val.difficulty = parseInt(document.getElementById('difficultySelect').value) || 0;
+                val.sex_level = parseInt(document.getElementById('sexLevelInput').value) || 0;
+                val.power_level = parseInt(document.getElementById('powerLevelInput').value) || 0;
+                val.skill_level = parseInt(document.getElementById('skillLevelInput').value) || 0;
+                val.work_level = parseInt(document.getElementById('workLevelInput').value) || 0;
+                val.energy = parseInt(document.getElementById('energyInput').value) || 100;
+                val.total_failed_401_count = parseInt(document.getElementById('failCountInput').value) || 0;
+                val.fish_coin = parseInt(document.getElementById('fishCoinInput').value) || 0;
+                val.total_success_401_count = parseInt(document.getElementById('success401Input').value) || 0;
+                val.exp = parseInt(document.getElementById('expInput').value) || 0;
+                val.is_clear = document.getElementById('isClearSelect').value === "true";
+            } else {
+                val.coin = parseInt(document.getElementById('coinInput').value) || 0;
+                val.my_coin = parseInt(document.getElementById('myCoinInput').value) || 0;
+                val.day = parseInt(document.getElementById('dayInput').value) || 1;
+                val.time = parseInt(document.getElementById('timeInput').value) || 0;
+                val.develop_point = parseInt(document.getElementById('devPointsInput').value) || 0;
+                val.difficulty = parseInt(document.getElementById('difficultySelect').value) || 0;
+                val.task_fail_count = parseInt(document.getElementById('failCountInput').value) || 0;
+            }
+
+            document.getElementById('rawJsonArea').value = JSON.stringify(decryptedJSON, null, 4);
+        }
+
+        encryptBtn.addEventListener('click', async () => {
+            const activeTab = document.querySelector('.tab.active').textContent;
+            if (activeTab.includes("Statistik") || activeTab.includes("Uang") || activeTab.includes("Tas")) {
+                collectFormData();
+            } else {
+                try {
+                    const rawText = document.getElementById('rawJsonArea').value;
+                    decryptedJSON = JSON.parse(rawText);
+                } catch (e) {
+                    showToast("Format JSON salah! Gagal menyimpan.", "error");
+                    return;
+                }
+            }
+
+            encryptSpinner.style.display = 'inline-block';
+            encryptBtn.disabled = true;
+
+            try {
+                const isRpgMaker = (selectedFormat === 'rpgsave');
+                
+                if (isRpgMaker) {
+                    const rawJsonText = JSON.stringify(decryptedJSON);
+                    const compressedText = LZString.compressToBase64(rawJsonText);
+                    
+                    const blob = new Blob([compressedText], { type: "text/plain;charset=utf-8" });
+                    const link = document.createElement("a");
+                    link.href = URL.createObjectURL(blob);
+                    link.download = selectedFile ? selectedFile.name : "file1.rpgsave";
+                    link.click();
+                    
+                    showToast("Save file RPG Maker berhasil disimpan & di-download!");
+                } else {
+                    const rawJsonText = JSON.stringify(decryptedJSON);
+                    const gameFormattedText = postprocess_es3_json(rawJsonText);
+                    
+                    const finalBytes = await encryptES3(gameFormattedText, passwordInput.value, wasGzipped);
+
+                    const blob = new Blob([finalBytes], { type: "application/octet-stream" });
+                    const link = document.createElement("a");
+                    link.href = URL.createObjectURL(blob);
+                    link.download = selectedFile ? selectedFile.name : "user_data0.es3";
+                    link.click();
+
+                    showToast("File save berhasil dienkripsi & di-download!");
+                }
+                encryptSpinner.style.display = 'none';
+                encryptBtn.disabled = false;
+            } catch (err) {
+                console.error(err);
+                encryptSpinner.style.display = 'none';
+                encryptBtn.disabled = false;
+                showToast("Gagal mengenkripsi data!", "error");
+            }
+        });
+
+        resetBtn.addEventListener('click', () => {
+            selectedFile = null;
+            fileData = null;
+            decryptedJSON = null;
+            selectedFormat = null;
+            detectedGame = "unknown";
+            
+            editorSection.style.display = 'none';
+            decryptSection.style.display = 'none';
+            dropZone.style.display = 'block';
+            fileInput.value = '';
+            
+            switchTab(0);
+            
+            showToast("Halaman siap memuat file baru.");
+        });
+
+        function switchTab(index) {
+            const activeTab = document.querySelector('.tab.active');
+            if (activeTab && (activeTab.textContent.includes("Statistik") || activeTab.textContent.includes("Uang") || activeTab.textContent.includes("Tas"))) {
+                collectFormData();
+            }
+
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach((tab, idx) => {
+                if (idx === index) {
+                    tab.classList.add('active');
+                    if (contents[idx]) contents[idx].classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                    if (contents[idx]) contents[idx].classList.remove('active');
+                }
+            });
+
+            if (index === 3) {
+                document.getElementById('rawJsonArea').value = JSON.stringify(decryptedJSON, null, 4);
+            }
+        }
+
+        function showToast(message, type = "info") {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            const toastIcon = document.getElementById('toastIcon');
+
+            toastMsg.textContent = message;
+            if (type === "error") {
+                toast.classList.add('error');
+                toastIcon.textContent = "❌";
+            } else {
+                toast.classList.remove('error');
+                toastIcon.textContent = "✔️";
+            }
+
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
