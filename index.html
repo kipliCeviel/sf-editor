@@ -1888,7 +1888,7 @@
                     showToast("Save file RPG Maker berhasil disimpan & di-download!");
                 } else {
                     const rawJsonText = JSON.stringify(decryptedJSON);
-                    const gameFormattedText = postprocess_es3_json(rawJsonText);
+                    const gameFormattedText = (detectedGame === "massage") ? postprocess_es3_json(rawJsonText) : rawJsonText;
                     
                     const finalBytes = await encryptES3(gameFormattedText, passwordInput.value, wasGzipped);
 
