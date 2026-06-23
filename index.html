@@ -1816,7 +1816,20 @@
 
             if (detectedGame === "dojo") {
                 const enteredCoins = parseInt(document.getElementById('coinInput').value) || 0;
-                val.coin = enteredCoins;
+                const enteredFishCoins = parseInt(document.getElementById('fishCoinInput').value) || 0;
+                
+                if (typeof val.coin === 'object' && val.coin !== null) {
+                    val.coin.i = enteredCoins;
+                } else {
+                    val.coin = { i: enteredCoins };
+                }
+                
+                if (typeof val.fish_coin === 'object' && val.fish_coin !== null) {
+                    val.fish_coin.i = enteredFishCoins;
+                } else {
+                    val.fish_coin = { i: enteredFishCoins };
+                }
+
                 val.day = parseInt(document.getElementById('dayInput').value) || 1;
                 val.hour = parseInt(document.getElementById('timeInput').value) || 9;
                 val.difficulty = parseInt(document.getElementById('difficultySelect').value) || 0;
@@ -1826,7 +1839,6 @@
                 val.work_level = parseInt(document.getElementById('workLevelInput').value) || 0;
                 val.energy = parseInt(document.getElementById('energyInput').value) || 100;
                 val.total_failed_401_count = parseInt(document.getElementById('failCountInput').value) || 0;
-                val.fish_coin = parseInt(document.getElementById('fishCoinInput').value) || 0;
                 val.total_success_401_count = parseInt(document.getElementById('success401Input').value) || 0;
                 val.exp = parseInt(document.getElementById('expInput').value) || 0;
                 val.is_clear = document.getElementById('isClearSelect').value === "true";
