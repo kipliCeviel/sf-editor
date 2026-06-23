@@ -1816,11 +1816,7 @@
 
             if (detectedGame === "dojo") {
                 const enteredCoins = parseInt(document.getElementById('coinInput').value) || 0;
-                if (typeof val.coin === 'object' && val.coin !== null) {
-                    val.coin.i = enteredCoins;
-                } else {
-                    val.coin = { i: enteredCoins };
-                }
+                val.coin = enteredCoins;
                 val.day = parseInt(document.getElementById('dayInput').value) || 1;
                 val.hour = parseInt(document.getElementById('timeInput').value) || 9;
                 val.difficulty = parseInt(document.getElementById('difficultySelect').value) || 0;
