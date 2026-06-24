@@ -601,13 +601,39 @@
             --bg-card: rgba(255, 255, 255, 0.65);
             --text-main: #1e293b;
             --text-muted: #64748b;
+            --border: 1px solid rgba(15, 23, 42, 0.08);
+            --glow: 0 4px 20px rgba(0, 0, 0, 0.04);
             background-image: 
-                linear-gradient(rgba(240, 242, 245, 0.4), rgba(240, 242, 245, 0.65)),
-                url('bg.jpg');
+                linear-gradient(rgba(240, 242, 245, 0.25), rgba(240, 242, 245, 0.5)),
+                url('bg_day.png');
         }
 
         body.day-mode .container {
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1), 0 0 30px rgba(255, 58, 58, 0.08);
+            box-shadow: var(--glow);
+        }
+
+        body.day-mode .container::before {
+            opacity: 0.02;
+        }
+
+        body.day-mode h1 {
+            text-shadow: none;
+        }
+
+        body.day-mode .game-select-btn {
+            background: rgba(0, 0, 0, 0.02);
+            border-color: rgba(0, 0, 0, 0.08);
+            color: #1e293b;
+        }
+
+        body.day-mode .game-select-btn:hover {
+            background: rgba(0, 0, 0, 0.04);
+            border-color: rgba(0, 0, 0, 0.12);
+        }
+
+        body.day-mode .game-select-btn.active {
+            background: rgba(255, 58, 58, 0.06);
+            border-color: var(--accent-pink);
         }
 
         body.day-mode input[type="text"],
@@ -904,12 +930,50 @@
         body.day-mode .changelog-list {
             color: #475569;
         }
+
+        /* Variables, Inventory, and Switches tables & containers */
+        .section-divider {
+            margin-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 20px;
+        }
+        body.day-mode .section-divider {
+            border-top-color: rgba(0, 0, 0, 0.08);
+        }
+
+        .data-list-container {
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+        }
+        body.day-mode .data-list-container {
+            background: rgba(0, 0, 0, 0.02);
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+
+        .data-table-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+        }
+        body.day-mode .data-table-header {
+            border-bottom-color: rgba(0, 0, 0, 0.08);
+        }
+
+        .data-table-row {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        body.day-mode .data-table-row {
+            border-bottom-color: rgba(0, 0, 0, 0.04);
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <button id="themeToggleBtn" class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Day/Night Mode">🌙</button>
+        <button id="themeToggleBtn" class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle Day/Night Mode">☀️</button>
         <h1>SF EDITOR</h1>
         <p class="subtitle">Bypass enkripsi & edit save file (.es3 / .rpgsave) game Yakuza Rogue & RPG Maker</p>
 
@@ -995,7 +1059,7 @@
                 </div>
 
                 <!-- RPG Maker Variables Section -->
-                <div id="rpgVariablesSection" style="display: none; margin-top: 30px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 20px;">
+                <div id="rpgVariablesSection" class="section-divider" style="display: none;">
                     <h3 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; margin-bottom: 15px;">Daftar Variabel Game (RPG Maker)</h3>
                     <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px;">Semua status, hubungan, level intimasi, dan status misi disimpan di variabel game. Cari ID Variabel untuk mengedit nilainya.</p>
                     
@@ -1017,10 +1081,10 @@
                         </div>
                     </div>
 
-                    <div style="max-height: 250px; overflow-y: auto; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; background: rgba(0, 0, 0, 0.2); padding: 10px;">
+                    <div class="data-list-container">
                         <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
                             <thead>
-                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-muted);">
+                                <tr class="data-table-header">
                                     <th style="padding: 8px;">ID</th>
                                     <th style="padding: 8px;">Nilai Saat Ini</th>
                                     <th style="padding: 8px; text-align: right;">Aksi</th>
@@ -1118,10 +1182,10 @@
                         </div>
                     </div>
 
-                    <div style="max-height: 250px; overflow-y: auto; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; background: rgba(0, 0, 0, 0.2); padding: 10px;">
+                    <div class="data-list-container">
                         <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
                             <thead>
-                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-muted);">
+                                <tr class="data-table-header">
                                     <th style="padding: 8px;">Tipe</th>
                                     <th style="padding: 8px;">ID Item</th>
                                     <th style="padding: 8px;">Jumlah</th>
@@ -1164,10 +1228,10 @@
                         </div>
                     </div>
 
-                    <div style="max-height: 250px; overflow-y: auto; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; background: rgba(0, 0, 0, 0.2); padding: 10px;">
+                    <div class="data-list-container">
                         <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
                             <thead>
-                                <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-muted);">
+                                <tr class="data-table-header">
                                     <th style="padding: 8px;">ID</th>
                                     <th style="padding: 8px;">Status Saat Ini</th>
                                     <th style="padding: 8px; text-align: right;">Aksi</th>
@@ -1302,11 +1366,11 @@
             const btn = document.getElementById('themeToggleBtn');
             body.classList.toggle('day-mode');
             if (body.classList.contains('day-mode')) {
-                btn.textContent = '☀️';
+                btn.textContent = '🌙'; // In day mode, show moon to switch to night
                 localStorage.setItem('theme', 'day');
                 showToast("Mode Terang Aktif");
             } else {
-                btn.textContent = '🌙';
+                btn.textContent = '☀️'; // In night mode, show sun to switch to day
                 localStorage.setItem('theme', 'night');
                 showToast("Mode Gelap Aktif");
             }
@@ -1317,6 +1381,8 @@
             const savedTheme = localStorage.getItem('theme');
             if (savedTheme === 'day') {
                 document.body.classList.add('day-mode');
+                document.getElementById('themeToggleBtn').textContent = '🌙';
+            } else {
                 document.getElementById('themeToggleBtn').textContent = '☀️';
             }
         });
@@ -1781,7 +1847,7 @@
                 if (shouldDisplay) {
                     count++;
                     const row = document.createElement('tr');
-                    row.style.borderBottom = '1px solid rgba(255, 255, 255, 0.05)';
+                    row.className = 'data-table-row';
                     row.innerHTML = `
                         <td style="padding: 8px; font-weight: bold; color: var(--accent-pink);">#${i}</td>
                         <td style="padding: 8px; color: var(--text-main); max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${val === null ? 'null' : val}</td>
@@ -1885,7 +1951,7 @@
                 if (isMatch) {
                     count++;
                     const row = document.createElement('tr');
-                    row.style.borderBottom = '1px solid rgba(255, 255, 255, 0.05)';
+                    row.className = 'data-table-row';
                     row.innerHTML = `
                         <td style="padding: 8px; color: var(--text-muted);">${typeLabel}</td>
                         <td style="padding: 8px; font-weight: bold; color: var(--accent-pink);">ID #${id}</td>
@@ -1984,7 +2050,7 @@
                 if (shouldDisplay) {
                     count++;
                     const row = document.createElement('tr');
-                    row.style.borderBottom = '1px solid rgba(255, 255, 255, 0.05)';
+                    row.className = 'data-table-row';
                     row.innerHTML = `
                         <td style="padding: 8px; font-weight: bold; color: var(--accent-purple);">#${i}</td>
                         <td style="padding: 8px; color: ${val ? '#2ecc71' : 'var(--text-muted)'}; font-weight: 600;">${val ? 'ON (True)' : 'OFF (False)'}</td>
